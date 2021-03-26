@@ -1,0 +1,38 @@
+User Table:
+getUser(email)
+registerUser(email, firstName, lastName, profilePictureURL, active=true)
+createUser(email, firstName, lastName, active=false)
+updateUser(firstName, lastName, profilePicture, userId)
+
+League Table:
+createLeague(userId, leagueName, leagueFormatId)
+updateLeague(leagueName, leagueFormatId)
+deleteLeague(leagueId)
+getLeaguesForUser(userId)
+getLeague(leagueId)
+
+LeagueMember Table:
+createLeagueMember(userId, League_leagueID, role);
+deleteLeagueMember(userId);
+getLeagueMembers(leagueId);
+
+Matches Table:
+createMatch(leagueId)
+getMatch(matchId)
+deleteMatch(matchId)
+getMatchesForLeague(leagueID)
+getMatchesForUser(userId)
+
+Results Table:
+createResult(matchId, points, userId)
+updateResult(matchId, points, userId)
+getResult(matchId)
+deleteResult(matchId)
+getResultsForMatch(mastchId)
+getResultsForUser(userId)
+
+LeagueFormat Table
+createLeagueFormat(name, description)
+getLeagueFormat(leagueId)
+getAllLeagueFormats()
+deleteleagueFormat(leagueId)
