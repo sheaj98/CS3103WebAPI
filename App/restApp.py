@@ -21,12 +21,8 @@ api = Api(app)
 # Error handlers
 #
 @app.errorhandler(400) # decorators to add to 400 response
-def bad_request():
+def bad_request(error):
 	return make_response(jsonify( { "status": "Bad request" } ), 400)
-
-@app.errorhandler(404) # decorators to add to 404 response
-def resource_not_found():
-	return make_response(jsonify( { "status": "Resource not found" } ), 404)
 
 @app.errorhandler(404) # decorators to add to 404 response
 def not_found(error):
@@ -64,7 +60,7 @@ class Users(Resource):
 		# Curl Example: curl "http://cs3103.cs.unb.ca:52617/users?email=random@test.com"
 		email = request.args.get('email')
 		if not email:
-			return bad_request()
+			return bad_request(None)
 
 		try:
 			dbConnection = getDBConnection()
@@ -74,7 +70,7 @@ class Users(Resource):
 			cursor.callproc(sql,sqlArgs) # stored procedure, no arguments
 			row = cursor.fetchone() # get the single result
 			if row is None:
-				return resource_not_found()
+				return not_found(None)
 		except:
 			abort(500) # Nondescript server error
 		finally:
@@ -85,9 +81,9 @@ class Users(Resource):
 	def post(self):
 		# Curl Example:  curl -i -X POST -H "Content-Type: application/json" -d '{"email": "random@test.com", "firstName": "random", "lastName": "user", "isActive": true}' http://cs3103.cs.unb.ca:52617/users
 		if not request.json:
-			return bad_request() # bad request
+			return bad_request(None) # bad request
 		if not 'email' in request.json or not 'firstName' in request.json or not 'lastName' in request.json or not 'isActive' in request.json:
-			return bad_request() # bad request
+			return bad_request(None) # bad request
 
 			# The request object holds the ... wait for it ... client request!
 		# Pull the results out of the json request
@@ -107,7 +103,7 @@ class Users(Resource):
 				row = cursor.fetchone()
 				dbConnection.commit() # database was modified, commit the changes
 			except:
-				return bad_request()
+				return bad_request(None)
 		except:
 			abort(500) # Nondescript server error
 		finally:
@@ -119,9 +115,9 @@ class User(Resource):
 	def put(self, userId):
 		# Curl Example: curl -i -X PUT -H "Content-Type: application/json" -d '{"firstName": "Emoney", "lastName": "Eddy", "profileImageUrl": "www.google.com", "isActive": false}' http://cs3103.cs.unb.ca:52617/users/4
 		if not request.json:
-			return bad_request() # bad request
+			return bad_request(None) # bad request
 		if not 'firstName' in request.json or not 'lastName' in request.json or not 'profileImageUrl' in request.json or not 'isActive' in request.json:
-			return bad_request() # bad request
+			return bad_request(None) # bad request
 
 		# The request object holds the ... wait for it ... client request!
 		# Pull the results out of the json request
@@ -156,7 +152,7 @@ class LeagueMembers(Resource):
 			cursor.callproc(sql,sqlArgs) # stored procedure, no arguments
 			rows = cursor.fetchall() # get the single result
 			if len(rows) == 0:
-				return resource_not_found()
+				return not_found(None)
 		except:
 			abort(500) # Nondescript server error
 		finally:
@@ -167,9 +163,9 @@ class LeagueMembers(Resource):
 	def post(self, userId, leagueId):
 		# Curl Example:  curl -i -X POST -H "Content-Type: application/json" -d '{"userId": 6, "role": "Participant"}' http://cs3103.cs.unb.ca:52617/users/2/leagues/3/members
 		if not request.json:
-			return bad_request() # bad request
+			return bad_request(None) # bad request
 		if not 'userId' in request.json or not 'role' in request.json:
-			return bad_request() # bad request
+			return bad_request(None) # bad request
 
 			# The request object holds the ... wait for it ... client request!
 		# Pull the results out of the json request
@@ -185,7 +181,7 @@ class LeagueMembers(Resource):
 				row = cursor.fetchone()
 				dbConnection.commit() # database was modified, commit the changes
 			except:
-				return bad_request()
+				return bad_request(None)
 		except:
 			abort(500) # Nondescript server error
 		finally:
@@ -203,7 +199,7 @@ class LeaguesForUser(Resource):
 			cursor.callproc(sql,sqlArgs) # stored procedure, no arguments
 			rows = cursor.fetchall() # get the single result
 			if len(rows) == 0:
-				return resource_not_found()
+				return not_found(None)
 		except:
 			abort(500) # Nondescript server error
 		finally:
@@ -214,9 +210,9 @@ class LeaguesForUser(Resource):
 	def post(self, userId):
 		# Curl Example:  curl -i -X POST -H "Content-Type: application/json" -d '{"leagueName": "Test League", "leagueFormatId": 2}' http://cs3103.cs.unb.ca:52617/users/2/leagues
 		if not request.json:
-			return bad_request() # bad request
+			return bad_request(None) # bad request
 		if not 'leagueName' in request.json or not 'leagueFormatId' in request.json:
-			return bad_request() # bad request
+			return bad_request(None) # bad request
 
 			# The request object holds the ... wait for it ... client request!
 		# Pull the results out of the json request
@@ -232,7 +228,7 @@ class LeaguesForUser(Resource):
 				row = cursor.fetchone()
 				dbConnection.commit() # database was modified, commit the changes
 			except:
-				return bad_request()
+				return bad_request(None)
 		except:
 			abort(500) # Nondescript server error
 		finally:
@@ -250,7 +246,7 @@ class Leagues(Resource):
 			cursor.callproc(sql,sqlArgs) # stored procedure, no arguments
 			row = cursor.fetchone() # get the single result
 			if row is None:
-				return resource_not_found()
+				return not_found(None)
 		except:
 			abort(500) # Nondescript server error
 		finally:
