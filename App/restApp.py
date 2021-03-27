@@ -56,28 +56,6 @@ def getDBConnection():
 				cursorclass= pymysql.cursors.DictCursor)
 
 class Users(Resource):
-	def get(self):
-		# Curl Example: curl "http://cs3103.cs.unb.ca:52617/users?email=random@test.com"
-		email = request.args.get('email')
-		if not email:
-			return bad_request(None)
-
-		try:
-			dbConnection = getDBConnection()
-			sql = 'getUser'
-			cursor = dbConnection.cursor()
-			sqlArgs = (email,)
-			cursor.callproc(sql,sqlArgs) # stored procedure, no arguments
-			row = cursor.fetchone() # get the single result
-			if row is None:
-				return not_found(None)
-		except:
-			abort(500) # Nondescript server error
-		finally:
-			cursor.close()
-			dbConnection.close()
-		return make_response(jsonify({"user": row}), 200) # successful
-
 	def post(self):
 		# Curl Example:  curl -i -X POST -H "Content-Type: application/json" -d '{"email": "random@test.com", "firstName": "random", "lastName": "user", "isActive": true}' http://cs3103.cs.unb.ca:52617/users
 		if not request.json:
@@ -111,7 +89,6 @@ class Users(Resource):
 			dbConnection.close()
 
 class User(Resource):
-	#TODO: Check if the resource exists
 	def put(self, userId):
 		# Curl Example: curl -i -X PUT -H "Content-Type: application/json" -d '{"firstName": "Emoney", "lastName": "Eddy", "profileImageUrl": "www.google.com", "isActive": false}' http://cs3103.cs.unb.ca:52617/users/4
 		if not request.json:
@@ -140,6 +117,25 @@ class User(Resource):
 			cursor.close()
 			dbConnection.close()
 		return make_response(jsonify({"status": "successfully updated resource"}), 200) # successful
+	
+	def get(self, userId):
+		# Curl Example: curl http://cs3103.cs.unb.ca:52617/users/2
+		try:
+			dbConnection = getDBConnection()
+			sql = 'getUserById'
+			cursor = dbConnection.cursor()
+			sqlArgs = (userId,)
+			cursor.callproc(sql,sqlArgs) # stored procedure, no arguments
+			row = cursor.fetchone() # get the single result
+			if row is None:
+				return not_found(None)
+		except:
+			abort(500) # Nondescript server error
+		finally:
+			cursor.close()
+			dbConnection.close()
+		return make_response(jsonify({"user": row}), 200) # successful
+	
 
 class LeagueMembers(Resource):
 	def get(self, userId, leagueId):
@@ -151,8 +147,6 @@ class LeagueMembers(Resource):
 			sqlArgs = (leagueId,)
 			cursor.callproc(sql,sqlArgs) # stored procedure, no arguments
 			rows = cursor.fetchall() # get the single result
-			if len(rows) == 0:
-				return not_found(None)
 		except:
 			abort(500) # Nondescript server error
 		finally:
@@ -198,8 +192,6 @@ class LeaguesForUser(Resource):
 			sqlArgs = (userId,)
 			cursor.callproc(sql,sqlArgs) # stored procedure, no arguments
 			rows = cursor.fetchall() # get the single result
-			if len(rows) == 0:
-				return not_found(None)
 		except:
 			abort(500) # Nondescript server error
 		finally:
@@ -235,6 +227,44 @@ class LeaguesForUser(Resource):
 			cursor.close()
 			dbConnection.close()
 
+class LeagueMemberById(Resource):
+	def get(self, userId, leagueId, memberId):
+		# Curl Example: curl http://cs3103.cs.unb.ca:52617/users/1/leagues/3/members/1
+		try:
+			dbConnection = getDBConnection()
+			sql = 'getLeagueMember'
+			cursor = dbConnection.cursor()
+			sqlArgs = (leagueId, memberId)
+			cursor.callproc(sql,sqlArgs) # stored procedure, no arguments
+			row = cursor.fetchone() # get the single result
+			if row is None:
+				return not_found(None)
+		except:
+			abort(500) # Nondescript server error
+		finally:
+			cursor.close()
+			dbConnection.close()
+		return make_response(jsonify({"member": row}), 200) # successful
+
+	//TODO: Fix
+	def delete(self, userId, leagueId, memberId):
+		# Curl Example: curl -X DELETE http://cs3103.cs.unb.ca:52617/users/1/leagues/3/members/4
+		try:
+			dbConnection = getDBConnection()
+			sql = 'deleteLeagueMember'
+			cursor = dbConnection.cursor()
+			sqlArgs = (memberId, leagueId)
+			cursor.callproc(sql,sqlArgs) # stored procedure, no arguments
+			row = cursor.fetchone() # get the single result
+			if row is None:
+				return not_found(None)
+		except:
+			abort(500) # Nondescript server error
+		finally:
+			cursor.close()
+			dbConnection.close()
+		return make_response(jsonify({}), 204) # successful
+
 class Leagues(Resource):
 	def get(self, userId, leagueId):
 		# Curl Example: curl http://cs3103.cs.unb.ca:52617/users/1/leagues/4
@@ -267,6 +297,7 @@ api.add_resource(Users, '/users')
 api.add_resource(User, '/users/<int:userId>')
 api.add_resource(LeagueMembers, '/users/<int:userId>/leagues/<int:leagueId>/members')
 api.add_resource(LeaguesForUser, '/users/<int:userId>/leagues')
+api.add_resource(LeagueMemberById, '/users/<int:userId>/leagues/<int:leagueId>/members/<int:memberId>')
 api.add_resource(Leagues, '/users/<int:userId>/leagues/<int:leagueId>')
 
 #############################################################################
