@@ -116,7 +116,7 @@ class User(Resource):
 		finally:
 			cursor.close()
 			dbConnection.close()
-		return make_response(jsonify({"status": "successfully updated resource"}), 200) # successful
+		return make_response(jsonify({"status": "successfully updated resource"}), 204) # successful
 	
 	def get(self, userId):
 		# Curl Example: curl http://cs3103.cs.unb.ca:52617/users/2
@@ -246,7 +246,6 @@ class LeagueMemberById(Resource):
 			dbConnection.close()
 		return make_response(jsonify({"member": row}), 200) # successful
 
-	//TODO: Fix
 	def delete(self, userId, leagueId, memberId):
 		# Curl Example: curl -X DELETE http://cs3103.cs.unb.ca:52617/users/1/leagues/3/members/4
 		try:
@@ -254,10 +253,12 @@ class LeagueMemberById(Resource):
 			sql = 'deleteLeagueMember'
 			cursor = dbConnection.cursor()
 			sqlArgs = (memberId, leagueId)
-			cursor.callproc(sql,sqlArgs) # stored procedure, no arguments
-			row = cursor.fetchone() # get the single result
-			if row is None:
-				return not_found(None)
+			try:
+				cursor.callproc(sql,sqlArgs) # stored procedure, no arguments
+				row = cursor.fetchone() # get the single result
+				dbConnection.commit()
+			except:
+				return bad_request(None)
 		except:
 			abort(500) # Nondescript server error
 		finally:
@@ -282,9 +283,162 @@ class Leagues(Resource):
 		finally:
 			cursor.close()
 			dbConnection.close()
-		return make_response(jsonify({"league": row}), 200) # successful		
+		return make_response(jsonify({"league": row}), 200) # successful
 
+	def delete(self, userId, leagueId):
+		# Curl Example: curl -X DELETE http://cs3103.cs.unb.ca:52617/users/1/leagues/6
+		try:
+			dbConnection = getDBConnection()
+			sql = 'deleteLeague'
+			cursor = dbConnection.cursor()
+			sqlArgs = (leagueId,)
+			try:
+				cursor.callproc(sql,sqlArgs) # stored procedure, no arguments
+				row = cursor.fetchone() # get the single result
+				dbConnection.commit()
+			except:
+				return bad_request(None)
+		except:
+			abort(500) # Nondescript server error
+		finally:
+			cursor.close()
+			dbConnection.close()
+		return make_response(jsonify({}), 204) # successful
 
+	def put(self, userId, leagueId):
+		# Curl Example: curl -i -X PUT -H "Content-Type: application/json" -d '{"name": "Test League New Name", "leagueFormatId": 1}' http://cs3103.cs.unb.ca:52617/users/4/leagues/5
+		if not request.json:
+			return bad_request(None) # bad request
+		if not 'name' in request.json or not 'leagueFormatId' in request.json:
+			return bad_request(None) # bad request
+
+		name = request.json['name']
+		leagueFormatId = request.json['leagueFormatId']
+
+		try:
+			dbConnection = getDBConnection()
+			sql = 'updateLeague'
+			cursor = dbConnection.cursor()
+			sqlArgs = (leagueId, name, leagueFormatId)
+			cursor.callproc(sql,sqlArgs)
+			row = cursor.fetchone()
+			dbConnection.commit() # database was modified, commit the changes
+		except:
+			abort(500) # Nondescript server error
+		finally:
+			cursor.close()
+			dbConnection.close()
+		return make_response(jsonify({"status": "successfully updated resource"}), 204) # successful
+
+class Matches(Resource): 
+	def post(self, userId, leagueId):
+		# Curl Example:  curl -i -X POST http://cs3103.cs.unb.ca:52617/users/2/leagues/2/matches
+		try:
+			dbConnection = getDBConnection()
+			cursor = dbConnection.cursor()
+			sqlArgs = (leagueId,)
+			try:
+				cursor.callproc('createMatch',sqlArgs) 
+				row = cursor.fetchone()
+				dbConnection.commit() # database was modified, commit the changes
+			except:
+				return bad_request(None)
+		except:
+			abort(500) # Nondescript server error
+		finally:
+			cursor.close()
+			dbConnection.close()
+
+	def get(self, userId, leagueId):
+		# Curl Example: curl http://cs3103.cs.unb.ca:52617/users/1/leagues/4/matches
+		try:
+			dbConnection = getDBConnection()
+			sql = 'getMatchesForLeague'
+			cursor = dbConnection.cursor()
+			sqlArgs = (leagueId,)
+			cursor.callproc(sql,sqlArgs) # stored procedure, no arguments
+			rows = cursor.fetchall() # get the single result
+			allrows = []
+			for row in rows:
+				sqlArgs2 = (row['matchId'],)
+				cursor.callproc('getResultsForMatch', sqlArgs2)
+				rows2 = cursor.fetchall()
+				for r in rows2:
+					allrows.append(r)			
+		except:
+			abort(500) # Nondescript server error
+		finally:
+			cursor.close()
+			dbConnection.close()
+		return make_response(jsonify({"league": allrows}), 200) # successful
+
+class Match(Resource): 
+	def get(self, userId, leagueId, matchId):
+		# Curl Example: curl http://cs3103.cs.unb.ca:52617/users/1/leagues/4/matches/2
+		try:
+			dbConnection = getDBConnection()
+			sql = 'getMatchById'
+			cursor = dbConnection.cursor()
+			sqlArgs = (matchId,)
+			cursor.callproc(sql,sqlArgs) # stored procedure, no arguments
+			row = cursor.fetchone() # get the single result
+			if row is None:
+				return not_found(None)
+		except:
+			abort(500) # Nondescript server error
+		finally:
+			cursor.close()
+			dbConnection.close()
+		return make_response(jsonify({"league": row}), 200) # successful
+
+	def delete(self, userId, leagueId, matchId):
+		# Curl Example: curl -X DELETE http://cs3103.cs.unb.ca:52617/users/1/leagues/6/matches/2
+		try:
+			dbConnection = getDBConnection()
+			sql = 'deleteMatch'
+			cursor = dbConnection.cursor()
+			sqlArgs = (matchId,)
+			try:
+				cursor.callproc(sql,sqlArgs) # stored procedure, no arguments
+				row = cursor.fetchone() # get the single result
+				dbConnection.commit()
+			except:
+				return bad_request(None)
+		except:
+			abort(500) # Nondescript server error
+		finally:
+			cursor.close()
+			dbConnection.close()
+		return make_response(jsonify({}), 204) # successful
+
+class Results(Resource):
+	def post(self, userId, leagueId, matchId):
+		# Curl Example:  curl -i -X POST -H "Content-Type: application/json" -d '{"points": 100, "userId": 1}' http://cs3103.cs.unb.ca:52617/users/1/leagues/6/matches/2/results
+		if not request.json:
+			return bad_request(None) # bad request
+		if not 'points' in request.json or not 'userId' in request.json:
+			return bad_request(None) # bad request
+
+			# The request object holds the ... wait for it ... client request!
+		# Pull the results out of the json request
+		points = request.json['points']
+		userIdIn = request.json['userId']
+
+		try:
+			dbConnection = getDBConnection()
+			cursor = dbConnection.cursor()
+			sqlArgs = (matchId, points, userIdIn)
+			try:
+				cursor.callproc('createResult',sqlArgs) 
+				row = cursor.fetchone()
+				dbConnection.commit() # database was modified, commit the changes
+			except:
+				return bad_request(None)
+		except:
+			abort(500) # Nondescript server error
+		finally:
+			cursor.close()
+			dbConnection.close()
 
 ####################################################################################
 #
@@ -299,6 +453,9 @@ api.add_resource(LeagueMembers, '/users/<int:userId>/leagues/<int:leagueId>/memb
 api.add_resource(LeaguesForUser, '/users/<int:userId>/leagues')
 api.add_resource(LeagueMemberById, '/users/<int:userId>/leagues/<int:leagueId>/members/<int:memberId>')
 api.add_resource(Leagues, '/users/<int:userId>/leagues/<int:leagueId>')
+api.add_resource(Matches, '/users/<int:userId>/leagues/<int:leagueId>/matches')
+api.add_resource(Match, '/users/<int:userId>/leagues/<int:leagueId>/matches/<int:matchId>')
+api.add_resource(Results, '/users/<int:userId>/leagues/<int:leagueId>/matches/<int:matchId>/results')
 
 #############################################################################
 # xxxxx= last 5 digits of your studentid. If xxxxx > 65535, subtract 30000
