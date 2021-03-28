@@ -15,6 +15,7 @@ LeagueMember Table:
 createLeagueMember(userId, League_leagueID, role);
 deleteLeagueMember(userId);
 getLeagueMembers(leagueId);
+getLeagueMember(leagueId, userId);
 
 Matches Table:
 createMatch(leagueId)

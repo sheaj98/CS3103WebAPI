@@ -1,9 +1,19 @@
 #!/usr/bin/env python3
 
-from flask import Flask, jsonify, abort, request, make_response
-from flask_restful import Resource, Api
-import pymysql.cursors
+
+from __future__ import print_function # In python 2.7
+from ldap3 import Server, Connection, ALL
+from ldap3.core.exceptions import *
+from flask import Flask, jsonify, abort, request, make_response, session
+from flask_restful import reqparse, Resource, Api
+from flask_session import Session
+from functools import wraps
 import json
+import sys
+import pymysql
+import pymysql.cursors
+import sys
+import ssl #include ssl libraries
 
 import cgitb
 import cgi
@@ -14,6 +24,13 @@ import settings # Our server and db settings, stored in settings.py
 
 app = Flask(__name__, static_url_path='/static')
 api = Api(app)
+
+app.config['SECRET_KEY'] = settings.SECRET_KEY
+app.config['SESSION_TYPE'] = 'filesystem'
+app.config['SESSION_COOKIE_NAME'] = 'peanutButter'
+app.config['SESSION_COOKIE_DOMAIN'] = settings.APP_HOST
+
+Session(app)
 
 
 ####################################################################################
@@ -27,6 +44,10 @@ def bad_request(error):
 @app.errorhandler(404) # decorators to add to 404 response
 def not_found(error):
 	return make_response(jsonify( { "status": "Resource not found" } ), 404)
+
+@app.errorhandler(401)
+def not_authorized():
+	return make_response(jsonify( { "status": "Not Authorized"}), 401)
 
 ####################################################################################
 #
@@ -55,9 +76,179 @@ def getDBConnection():
 				charset='utf8mb4',
 				cursorclass= pymysql.cursors.DictCursor)
 
+def owner_decorator():
+	def _owner_decorator(f):
+		@wraps(f)
+		def __owner_decorator(*func, **args):
+			print("args: {0}".format(args))
+			userId = args.get('userId')
+			print("userId: {0}".format(userId))
+			print("{0}".format(session))
+			sessionUserId = session.get('userId', 'Not Auth')
+			print("userId: {0}".format(sessionUserId))
+			if userId != sessionUserId:
+				return not_authorized()
+
+			if 'leagueId' in args:
+				leagueId = args["leagueId"]
+				try:
+					dbConnection = getDBConnection()
+					sql = 'getLeagueMember'
+					cursor = dbConnection.cursor()
+					sqlArgs = (userId,leagueId)
+					cursor.callproc(sql,sqlArgs) # stored procedure, no arguments
+					row = cursor.fetchone() # get the single result
+					if row is None:
+						return not_authorized()
+					
+					role = row["role"]
+					if role != "owner":
+						return not_authorized()
+				except:
+					return abort(500) # Nondescript server error
+				finally:
+					cursor.close()
+					dbConnection.close()
+
+
+			result = f(*func, **args)
+            
+			return result
+		return __owner_decorator
+	return _owner_decorator
+
+def member_decorator():
+	def _member_decorator(f):
+		@wraps(f)
+		def __member_decorator(*func, **args):
+			print("args: {0}".format(args))
+			userId = args.get('userId')
+			print("userId: {0}".format(userId))
+			sessionUserId = session.get("userId", "Not Authed")
+			print("userId: {0}".format(sessionUserId))
+			if userId != sessionUserId:
+				return not_authorized()
+
+			if 'leagueId' in args:
+				leagueId = args["leagueId"]
+				try:
+					dbConnection = getDBConnection()
+					sql = 'getLeagueMember'
+					cursor = dbConnection.cursor()
+					sqlArgs = (leagueId,userId)
+					cursor.callproc(sql,sqlArgs) # stored procedure, no arguments
+					row = cursor.fetchone() # get the single result
+					print("{0}".format(row))
+					if row is None:
+						return not_authorized()
+					
+					role = row["role"]
+					if role != "owner" and role !="member":
+						return not_authorized()
+				except:
+					return abort(500) # Nondescript server error
+				finally:
+					cursor.close()
+					dbConnection.close()
+
+
+			result = f(*func, **args)
+            
+			return result
+		return __member_decorator
+	return _member_decorator
+
+def user_decorator():
+	def _user_decorator(f):
+		@wraps(f)
+		def __user_decorator(*func, **args):
+			print("args: {0}".format(args))
+			if 'userId' in session:
+				userId = session['userId']
+				if 'userId' in args:
+					if userId != args['userId']:
+						return not_authorized()
+				result = f(*func, **args)
+				return result
+			else:
+				return not_authorized()
+			
+		return __user_decorator
+	return _user_decorator
+
+def auth_decorator():
+	def _auth_decorator(f):
+		@wraps(f)
+		def __auth_decorator(*func, **args):
+			print("args: {0}".format(args))
+			if 'userId' in session:
+				result = f(*func, **args)
+				return result
+			else:
+				return not_authorized()
+			
+		return __auth_decorator
+	return _auth_decorator
+
+
+class Login(Resource):
+	#curl -i -X POST -H "Content-Type: application/json" -d '{"email": "ssulliv2", "password": "Lox5Sens\!lox"}' http://cs3103.cs.unb.ca:58651/login
+	def post(self):
+		if not request.json:
+			return bad_request(None) # bad request
+		
+		parser = reqparse.RequestParser()
+		try:
+ 			# Check for required attributes in json document, create a dictionary
+			parser.add_argument('email', type=str, required=True)
+			parser.add_argument('password', type=str, required=True)
+			request_params = parser.parse_args()
+		except:
+			return bad_request(None)
+		if request_params['email'] in session:
+			return make_response(jsonify({"status": "success"}), 200)
+		else:
+			try:
+				
+				ldapServer = Server(host=settings.LDAP_HOST)
+				ldapConnection = Connection(ldapServer,
+					raise_exceptions=True,
+					user='uid='+request_params['email']+', ou=People,ou=fcs,o=unb',
+					password = request_params['password'])
+				ldapConnection.open()
+				ldapConnection.start_tls()
+				ldapConnection.bind()
+
+				dbConnection = getDBConnection()
+				sql = 'getUser'
+				cursor = dbConnection.cursor()
+				email = request_params["email"] + "@unb.ca"
+				sqlArgs = (email,)
+				cursor.callproc(sql,sqlArgs) # stored procedure, no arguments
+				row = cursor.fetchone() # get the single result
+				if row is None:
+					print("User not found")
+					return bad_request(None)
+				userId = row.get("userId")
+				print("{0}".format(userId))
+				session['userId'] = userId
+
+				if row.get("isActive") is 0:
+					sql = 'updateUser'
+					sqlArgs = (row.get("userId"), row.get("firstName"), row.get("lastName"), row.get("profileImageUrl"), 1,)
+					cursor.callproc(sql,sqlArgs)
+					row = cursor.fetchone()
+					dbConnection.commit() # database was modified, commit the changes
+
+				return make_response(jsonify({"user": row}), 200) # successful
+			except:
+				return bad_request(None)
+			finally:
+				ldapConnection.unbind()
+
 class Users(Resource):
 	def post(self):
-		# Curl Example:  curl -i -X POST -H "Content-Type: application/json" -d '{"email": "random@test.com", "firstName": "random", "lastName": "user", "isActive": true}' http://cs3103.cs.unb.ca:52617/users
+		# Curl Example:  curl -i -X POST -H "Content-Type: application/json" -d '{"email": "random@test.com", "firstName": "random", "lastName": "user", "isActive": true}' http://cs3103.cs.unb.ca:58651/users
 		if not request.json:
 			return bad_request(None) # bad request
 		if not 'email' in request.json or not 'firstName' in request.json or not 'lastName' in request.json or not 'isActive' in request.json:
@@ -79,7 +270,9 @@ class Users(Resource):
 				else:
 					cursor.callproc('createUser',sqlArgs)
 				row = cursor.fetchone()
+				userId = row.get("LAST_INSERT_ID()")
 				dbConnection.commit() # database was modified, commit the changes
+				return make_response(jsonify({"userId": userId}), 201)
 			except:
 				return bad_request(None)
 		except:
@@ -89,6 +282,7 @@ class Users(Resource):
 			dbConnection.close()
 
 class User(Resource):
+	@user_decorator()
 	def put(self, userId):
 		# Curl Example: curl -i -X PUT -H "Content-Type: application/json" -d '{"firstName": "Emoney", "lastName": "Eddy", "profileImageUrl": "www.google.com", "isActive": false}' http://cs3103.cs.unb.ca:52617/users/4
 		if not request.json:
@@ -118,6 +312,7 @@ class User(Resource):
 			dbConnection.close()
 		return make_response(jsonify({"status": "successfully updated resource"}), 204) # successful
 	
+	@auth_decorator()
 	def get(self, userId):
 		# Curl Example: curl http://cs3103.cs.unb.ca:52617/users/2
 		try:
@@ -138,6 +333,7 @@ class User(Resource):
 	
 
 class LeagueMembers(Resource):
+	@member_decorator()
 	def get(self, userId, leagueId):
 		# Curl Example: curl http://cs3103.cs.unb.ca:52617/users/2/leagues/3/members
 		try:
@@ -154,6 +350,7 @@ class LeagueMembers(Resource):
 			dbConnection.close()
 		return make_response(jsonify({"members": rows}), 200) # successful
 
+	@owner_decorator()
 	def post(self, userId, leagueId):
 		# Curl Example:  curl -i -X POST -H "Content-Type: application/json" -d '{"userId": 6, "role": "Participant"}' http://cs3103.cs.unb.ca:52617/users/2/leagues/3/members
 		if not request.json:
@@ -163,8 +360,8 @@ class LeagueMembers(Resource):
 
 			# The request object holds the ... wait for it ... client request!
 		# Pull the results out of the json request
-		userIdIn = request.json['userId'];
-		role = request.json['role'];
+		userIdIn = request.json['userId']
+		role = request.json['role']
 
 		try:
 			dbConnection = getDBConnection()
@@ -173,7 +370,9 @@ class LeagueMembers(Resource):
 			try:
 				cursor.callproc('createLeagueMember',sqlArgs) 
 				row = cursor.fetchone()
+				memberId = row.get("LAST_INSERT_ID()")
 				dbConnection.commit() # database was modified, commit the changes
+				return make_response(jsonify({"memberId": resultId}), 201)
 			except:
 				return bad_request(None)
 		except:
@@ -183,8 +382,9 @@ class LeagueMembers(Resource):
 			dbConnection.close()
 
 class LeaguesForUser(Resource):
+	@user_decorator()
 	def get(self, userId):
-		# Curl Example: curl http://cs3103.cs.unb.ca:52617/users/1/leagues
+		# Curl Example: curl -c cookie-jar http://cs3103.cs.unb.ca:58651/users/1/leagues
 		try:
 			dbConnection = getDBConnection()
 			sql = 'getLeaguesForUser'
@@ -199,8 +399,9 @@ class LeaguesForUser(Resource):
 			dbConnection.close()
 		return make_response(jsonify({"leagues": rows}), 200) # successful
 
+	@user_decorator()
 	def post(self, userId):
-		# Curl Example:  curl -i -X POST -H "Content-Type: application/json" -d '{"leagueName": "Test League", "leagueFormatId": 2}' http://cs3103.cs.unb.ca:52617/users/2/leagues
+		# Curl Example:  curl -i -X POST -H "Content-Type: application/json" -b cookie-jar -d '{"leagueName": "Shea's League", "leagueFormatId": 2}' http://cs3103.cs.unb.ca:58651/users/2/leagues
 		if not request.json:
 			return bad_request(None) # bad request
 		if not 'leagueName' in request.json or not 'leagueFormatId' in request.json:
@@ -219,6 +420,12 @@ class LeaguesForUser(Resource):
 				cursor.callproc('createLeague',sqlArgs) 
 				row = cursor.fetchone()
 				dbConnection.commit() # database was modified, commit the changes
+				leagueId = row.get('LAST_INSERT_ID()')
+				sqlArgs = (userId, leagueId, "owner")
+				cursor.callproc('createLeagueMember',sqlArgs) 
+				row = cursor.fetchone()
+				dbConnection.commit() # database was modified, commit the changes
+				return make_response(jsonify({ "leagueId": leagueId }), 201)
 			except:
 				return bad_request(None)
 		except:
@@ -228,6 +435,7 @@ class LeaguesForUser(Resource):
 			dbConnection.close()
 
 class LeagueMemberById(Resource):
+	@member_decorator()
 	def get(self, userId, leagueId, memberId):
 		# Curl Example: curl http://cs3103.cs.unb.ca:52617/users/1/leagues/3/members/1
 		try:
@@ -246,6 +454,7 @@ class LeagueMemberById(Resource):
 			dbConnection.close()
 		return make_response(jsonify({"member": row}), 200) # successful
 
+	@owner_decorator()
 	def delete(self, userId, leagueId, memberId):
 		# Curl Example: curl -X DELETE http://cs3103.cs.unb.ca:52617/users/1/leagues/3/members/4
 		try:
@@ -267,6 +476,7 @@ class LeagueMemberById(Resource):
 		return make_response(jsonify({}), 204) # successful
 
 class Leagues(Resource):
+	@member_decorator()
 	def get(self, userId, leagueId):
 		# Curl Example: curl http://cs3103.cs.unb.ca:52617/users/1/leagues/4
 		try:
@@ -285,6 +495,7 @@ class Leagues(Resource):
 			dbConnection.close()
 		return make_response(jsonify({"league": row}), 200) # successful
 
+	@owner_decorator()
 	def delete(self, userId, leagueId):
 		# Curl Example: curl -X DELETE http://cs3103.cs.unb.ca:52617/users/1/leagues/6
 		try:
@@ -305,6 +516,7 @@ class Leagues(Resource):
 			dbConnection.close()
 		return make_response(jsonify({}), 204) # successful
 
+	@owner_decorator()
 	def put(self, userId, leagueId):
 		# Curl Example: curl -i -X PUT -H "Content-Type: application/json" -d '{"name": "Test League New Name", "leagueFormatId": 1}' http://cs3103.cs.unb.ca:52617/users/4/leagues/5
 		if not request.json:
@@ -330,9 +542,10 @@ class Leagues(Resource):
 			dbConnection.close()
 		return make_response(jsonify({"status": "successfully updated resource"}), 204) # successful
 
-class Matches(Resource): 
+class Matches(Resource):
+	@member_decorator() 
 	def post(self, userId, leagueId):
-		# Curl Example:  curl -i -X POST http://cs3103.cs.unb.ca:52617/users/2/leagues/2/matches
+		# Curl Example:  curl -i -X POST -b cookie-jar http://cs3103.cs.unb.ca:58651/users/16/leagues/11/matches
 		try:
 			dbConnection = getDBConnection()
 			cursor = dbConnection.cursor()
@@ -340,7 +553,9 @@ class Matches(Resource):
 			try:
 				cursor.callproc('createMatch',sqlArgs) 
 				row = cursor.fetchone()
+				matchId = row.get('LAST_INSERT_ID()', 'None')
 				dbConnection.commit() # database was modified, commit the changes
+				return make_response(jsonify({ "matchId": matchId}), 201)
 			except:
 				return bad_request(None)
 		except:
@@ -349,6 +564,7 @@ class Matches(Resource):
 			cursor.close()
 			dbConnection.close()
 
+	@member_decorator()
 	def get(self, userId, leagueId):
 		# Curl Example: curl http://cs3103.cs.unb.ca:52617/users/1/leagues/4/matches
 		try:
@@ -363,8 +579,8 @@ class Matches(Resource):
 				sqlArgs2 = (row['matchId'],)
 				cursor.callproc('getResultsForMatch', sqlArgs2)
 				rows2 = cursor.fetchall()
-				for r in rows2:
-					allrows.append(r)			
+				row["results"] = rows2
+				allrows.append(row)
 		except:
 			abort(500) # Nondescript server error
 		finally:
@@ -373,6 +589,7 @@ class Matches(Resource):
 		return make_response(jsonify({"matches": allrows}), 200) # successful
 
 class Match(Resource): 
+	@member_decorator()
 	def get(self, userId, leagueId, matchId):
 		# Curl Example: curl http://cs3103.cs.unb.ca:52617/users/1/leagues/4/matches/2
 		try:
@@ -384,6 +601,10 @@ class Match(Resource):
 			row = cursor.fetchone() # get the single result
 			if row is None:
 				return not_found(None)
+			sqlArgs2 = (matchId,)
+			cursor.callproc('getResultsForMatch', sqlArgs2)
+			rows2 = cursor.fetchall()
+			row["results"] = rows2
 		except:
 			abort(500) # Nondescript server error
 		finally:
@@ -391,6 +612,7 @@ class Match(Resource):
 			dbConnection.close()
 		return make_response(jsonify({"match": row}), 200) # successful
 
+	@owner_decorator()
 	def delete(self, userId, leagueId, matchId):
 		# Curl Example: curl -X DELETE http://cs3103.cs.unb.ca:52617/users/1/leagues/6/matches/2
 		try:
@@ -412,8 +634,9 @@ class Match(Resource):
 		return make_response(jsonify({}), 204) # successful
 
 class Results(Resource):
+	@member_decorator()
 	def post(self, userId, leagueId, matchId):
-		# Curl Example:  curl -i -X POST -H "Content-Type: application/json" -d '{"points": 100, "userId": 1}' http://cs3103.cs.unb.ca:52617/users/1/leagues/6/matches/2/results
+		# Curl Example:  curl -i -X POST -H "Content-Type: application/json" -b cookie-jar -d '{"points": 100, "userId": 1}' http://cs3103.cs.unb.ca:58651/users/16/leagues/11/matches/13/results
 		if not request.json:
 			return bad_request(None) # bad request
 		if not 'points' in request.json or not 'userId' in request.json:
@@ -429,7 +652,9 @@ class Results(Resource):
 			try:
 				cursor.callproc('createResult',sqlArgs) 
 				row = cursor.fetchone()
+				resultId = row.get("LAST_INSERT_ID()", "None")
 				dbConnection.commit() # database was modified, commit the changes
+				return make_response(jsonify({"resultId": resultId }), 201)
 			except:
 				return bad_request(None)
 		except:
@@ -437,7 +662,7 @@ class Results(Resource):
 		finally:
 			cursor.close()
 			dbConnection.close()
-
+	@member_decorator()
 	def get(self, userId, leagueId, matchId):
 		# Curl Example: curl http://cs3103.cs.unb.ca:52617/users/1/leagues/6/matches/2/results
 		try:
@@ -455,7 +680,7 @@ class Results(Resource):
 		return make_response(jsonify({"match": rows}), 200) # successful
 
 class Result(Resource):
-
+	@owner_decorator()
 	def delete(self, userId, leagueId, matchId, resultId): 
 		# Curl Example: curl -X DELETE http://cs3103.cs.unb.ca:52617/users/1/leagues/6/matches/2/results/1
 		try:
@@ -483,6 +708,7 @@ class Result(Resource):
 api = Api(app)
 
 # User Endpoints
+api.add_resource(Login, '/login')
 api.add_resource(Users, '/users')
 api.add_resource(User, '/users/<int:userId>')
 api.add_resource(LeagueMembers, '/users/<int:userId>/leagues/<int:leagueId>/members')

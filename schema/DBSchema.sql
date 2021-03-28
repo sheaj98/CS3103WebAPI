@@ -74,7 +74,7 @@ DROP TABLE IF EXISTS `ssulliv2`.`Result` ;
 
 CREATE TABLE IF NOT EXISTS `ssulliv2`.`Result` (
   `lastModified` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `resultId` INT NOT NULL,
+  `resultId` INT NOT NULL AUTO_INCREMENT,
   `Match_matchId` INT NOT NULL,
   `points` INT NOT NULL,
   `User_userId` INT NOT NULL,

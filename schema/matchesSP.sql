@@ -10,6 +10,7 @@ CREATE PROCEDURE createMatch(IN leagueIdIn int)
 BEGIN
 INSERT INTO `Match` (League_leagueId) VALUES
    (leagueIdIn);
+   SELECT LAST_INSERT_ID();
 END//
 DELIMITER ;
 
