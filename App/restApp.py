@@ -96,7 +96,7 @@ def owner_decorator():
 					dbConnection = getDBConnection()
 					sql = 'getLeagueMember'
 					cursor = dbConnection.cursor()
-					sqlArgs = (leagueId,userId)
+					sqlArgs = (userId, leagueId)
 					cursor.callproc(sql,sqlArgs) # stored procedure, no arguments
 					row = cursor.fetchone() # get the single result
 					if row is None:
@@ -136,7 +136,7 @@ def member_decorator():
 					dbConnection = getDBConnection()
 					sql = 'getLeagueMember'
 					cursor = dbConnection.cursor()
-					sqlArgs = (leagueId,userId)
+					sqlArgs = (userId, leagueId)
 					cursor.callproc(sql,sqlArgs) # stored procedure, no arguments
 					row = cursor.fetchone() # get the single result
 					print("{0}".format(row))
