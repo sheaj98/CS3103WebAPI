@@ -370,7 +370,7 @@ class Matches(Resource):
 		finally:
 			cursor.close()
 			dbConnection.close()
-		return make_response(jsonify({"league": allrows}), 200) # successful
+		return make_response(jsonify({"matches": allrows}), 200) # successful
 
 class Match(Resource): 
 	def get(self, userId, leagueId, matchId):
@@ -389,7 +389,7 @@ class Match(Resource):
 		finally:
 			cursor.close()
 			dbConnection.close()
-		return make_response(jsonify({"league": row}), 200) # successful
+		return make_response(jsonify({"match": row}), 200) # successful
 
 	def delete(self, userId, leagueId, matchId):
 		# Curl Example: curl -X DELETE http://cs3103.cs.unb.ca:52617/users/1/leagues/6/matches/2
@@ -419,8 +419,6 @@ class Results(Resource):
 		if not 'points' in request.json or not 'userId' in request.json:
 			return bad_request(None) # bad request
 
-			# The request object holds the ... wait for it ... client request!
-		# Pull the results out of the json request
 		points = request.json['points']
 		userIdIn = request.json['userId']
 
@@ -440,6 +438,44 @@ class Results(Resource):
 			cursor.close()
 			dbConnection.close()
 
+	def get(self, userId, leagueId, matchId):
+		# Curl Example: curl http://cs3103.cs.unb.ca:52617/users/1/leagues/6/matches/2/results
+		try:
+			dbConnection = getDBConnection()
+			sql = 'getResultsForMatch'
+			cursor = dbConnection.cursor()
+			sqlArgs = (matchId,)
+			cursor.callproc(sql,sqlArgs) # stored procedure, no arguments
+			rows = cursor.fetchall() # get the single result
+		except:
+			abort(500) # Nondescript server error
+		finally:
+			cursor.close()
+			dbConnection.close()
+		return make_response(jsonify({"match": rows}), 200) # successful
+
+class Result(Resource):
+
+	def delete(self, userId, leagueId, matchId, resultId): 
+		# Curl Example: curl -X DELETE http://cs3103.cs.unb.ca:52617/users/1/leagues/6/matches/2/results/1
+		try:
+			dbConnection = getDBConnection()
+			sql = 'deleteResult'
+			cursor = dbConnection.cursor()
+			sqlArgs = (resultId,)
+			try:
+				cursor.callproc(sql,sqlArgs) # stored procedure, no arguments
+				row = cursor.fetchone() # get the single result
+				dbConnection.commit()
+			except:
+				return bad_request(None)
+		except:
+			abort(500) # Nondescript server error
+		finally:
+			cursor.close()
+			dbConnection.close()
+		return make_response(jsonify({}), 204) # successful
+
 ####################################################################################
 #
 # Identify/create endpoints and endpoint objects
@@ -456,6 +492,7 @@ api.add_resource(Leagues, '/users/<int:userId>/leagues/<int:leagueId>')
 api.add_resource(Matches, '/users/<int:userId>/leagues/<int:leagueId>/matches')
 api.add_resource(Match, '/users/<int:userId>/leagues/<int:leagueId>/matches/<int:matchId>')
 api.add_resource(Results, '/users/<int:userId>/leagues/<int:leagueId>/matches/<int:matchId>/results')
+api.add_resource(Result, '/users/<int:userId>/leagues/<int:leagueId>/matches/<int:matchId>/results/<int:resultId>')
 
 #############################################################################
 # xxxxx= last 5 digits of your studentid. If xxxxx > 65535, subtract 30000
