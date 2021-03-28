@@ -96,7 +96,7 @@ def owner_decorator():
 					dbConnection = getDBConnection()
 					sql = 'getLeagueMember'
 					cursor = dbConnection.cursor()
-					sqlArgs = (userId,leagueId)
+					sqlArgs = (leagueId,userId)
 					cursor.callproc(sql,sqlArgs) # stored procedure, no arguments
 					row = cursor.fetchone() # get the single result
 					if row is None:
@@ -193,7 +193,7 @@ def auth_decorator():
 
 
 class Login(Resource):
-	#curl -i -X POST -H "Content-Type: application/json" -d '{"email": "ssulliv2", "password": "Lox5Sens\!lox"}' http://cs3103.cs.unb.ca:58651/login
+	# curl -i -X POST -H "Content-Type: application/json" -c cookie-jar -k -d '{"username": "<UNB FCS Username>", "password": "<UNB FCS Password>"}' https://cs3103.cs.unb.ca:58651/login
 	def post(self):
 		if not request.json:
 			return bad_request(None) # bad request
@@ -201,12 +201,12 @@ class Login(Resource):
 		parser = reqparse.RequestParser()
 		try:
  			# Check for required attributes in json document, create a dictionary
-			parser.add_argument('email', type=str, required=True)
+			parser.add_argument('username', type=str, required=True)
 			parser.add_argument('password', type=str, required=True)
 			request_params = parser.parse_args()
 		except:
 			return bad_request(None)
-		if request_params['email'] in session:
+		if request_params['username'] in session:
 			return make_response(jsonify({"status": "success"}), 200)
 		else:
 			try:
@@ -214,7 +214,7 @@ class Login(Resource):
 				ldapServer = Server(host=settings.LDAP_HOST)
 				ldapConnection = Connection(ldapServer,
 					raise_exceptions=True,
-					user='uid='+request_params['email']+', ou=People,ou=fcs,o=unb',
+					user='uid='+request_params['username']+', ou=People,ou=fcs,o=unb',
 					password = request_params['password'])
 				ldapConnection.open()
 				ldapConnection.start_tls()
@@ -223,7 +223,7 @@ class Login(Resource):
 				dbConnection = getDBConnection()
 				sql = 'getUser'
 				cursor = dbConnection.cursor()
-				email = request_params["email"] + "@unb.ca"
+				email = request_params["username"] + "@unb.ca"
 				sqlArgs = (email,)
 				cursor.callproc(sql,sqlArgs) # stored procedure, no arguments
 				row = cursor.fetchone() # get the single result
@@ -249,7 +249,7 @@ class Login(Resource):
 
 class Users(Resource):
 	def post(self):
-		# Curl Example:  curl -i -X POST -H "Content-Type: application/json" -d '{"email": "random@test.com", "firstName": "random", "lastName": "user", "isActive": true}' http://cs3103.cs.unb.ca:58651/users
+		# Curl Example:  curl -i -X POST -H "Content-Type: application/json" -k -d '{"email": "<Insert Email>", "firstName": "<Insert First Name>", "lastName": "<Insert Last Name>", "isActive": true}' https://cs3103.cs.unb.ca:58651/users
 		if not request.json:
 			return bad_request(None) # bad request
 		if not 'email' in request.json or not 'firstName' in request.json or not 'lastName' in request.json or not 'isActive' in request.json:
@@ -371,9 +371,8 @@ class LeagueMembers(Resource):
 			try:
 				cursor.callproc('createLeagueMember',sqlArgs) 
 				row = cursor.fetchone()
-				memberId = row.get("LAST_INSERT_ID()")
 				dbConnection.commit() # database was modified, commit the changes
-				return make_response(jsonify({"memberId": resultId}), 201)
+				return make_response(jsonify({}), 201)
 			except:
 				return bad_request(None)
 		except:
@@ -402,7 +401,7 @@ class LeaguesForUser(Resource):
 
 	@user_decorator()
 	def post(self, userId):
-		# Curl Example:  curl -i -X POST -H "Content-Type: application/json" -b cookie-jar -d '{"leagueName": "Shea's League", "leagueFormatId": 2}' http://cs3103.cs.unb.ca:58651/users/2/leagues
+		# Curl Example:  curl -i -k -X POST -H "Content-Type: application/json" -b cookie-jar -d '{"leagueName": "Test League", "leagueFormatId": 2}' https://cs3103.cs.unb.ca:58651/users/<Insert Your Id>/leagues
 		if not request.json:
 			return bad_request(None) # bad request
 		if not 'leagueName' in request.json or not 'leagueFormatId' in request.json:
@@ -519,13 +518,13 @@ class Leagues(Resource):
 
 	@owner_decorator()
 	def put(self, userId, leagueId):
-		# Curl Example: curl -i -X PUT -H "Content-Type: application/json" -d '{"name": "Test League New Name", "leagueFormatId": 1}' http://cs3103.cs.unb.ca:52617/users/4/leagues/5
+		# Curl Example: curl -i -X PUT -H "Content-Type: application/json" -d '{"leagueName": "Test League New Name", "leagueFormatId": 1}' http://cs3103.cs.unb.ca:52617/users/4/leagues/5
 		if not request.json:
 			return bad_request(None) # bad request
-		if not 'name' in request.json or not 'leagueFormatId' in request.json:
+		if not 'leagueName' in request.json or not 'leagueFormatId' in request.json:
 			return bad_request(None) # bad request
 
-		name = request.json['name']
+		name = request.json['leagueName']
 		leagueFormatId = request.json['leagueFormatId']
 
 		try:

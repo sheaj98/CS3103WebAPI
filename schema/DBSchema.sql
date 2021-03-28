@@ -64,7 +64,7 @@ CREATE TABLE IF NOT EXISTS `ssulliv2`.`Match` (
   CONSTRAINT `fk_Match_League1`
     FOREIGN KEY (`League_leagueId`)
     REFERENCES `ssulliv2`.`League` (`leagueId`)
-    ON DELETE NO ACTION
+    ON DELETE CASCADE
     ON UPDATE NO ACTION)
 
 -- -----------------------------------------------------
@@ -84,12 +84,12 @@ CREATE TABLE IF NOT EXISTS `ssulliv2`.`Result` (
   CONSTRAINT `fk_Result_Match1`
     FOREIGN KEY (`Match_matchId`)
     REFERENCES `ssulliv2`.`Match` (`matchId`)
-    ON DELETE NO ACTION
+    ON DELETE CASCADE
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_Result_User1`
     FOREIGN KEY (`User_userId`)
     REFERENCES `ssulliv2`.`User` (`userId`)
-    ON DELETE NO ACTION
+    ON DELETE CASCADE
     ON UPDATE NO ACTION)
 
 -- -----------------------------------------------------
@@ -108,10 +108,10 @@ CREATE TABLE IF NOT EXISTS `ssulliv2`.`LeagueMember` (
   CONSTRAINT `fk_User_has_League_User1`
     FOREIGN KEY (`User_userId`)
     REFERENCES `ssulliv2`.`User` (`userId`)
-    ON DELETE NO ACTION
+    ON DELETE CASCADE
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_User_has_League_League1`
     FOREIGN KEY (`League_leagueId`)
     REFERENCES `ssulliv2`.`League` (`leagueId`)
-    ON DELETE NO ACTION
+    ON DELETE CASCADE
     ON UPDATE NO ACTION)
