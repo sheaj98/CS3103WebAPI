@@ -15,6 +15,7 @@ import pymysql.cursors
 import sys
 import ssl #include ssl libraries
 
+import ssl
 import cgitb
 import cgi
 import sys
@@ -723,5 +724,5 @@ api.add_resource(Result, '/users/<int:userId>/leagues/<int:leagueId>/matches/<in
 #############################################################################
 # xxxxx= last 5 digits of your studentid. If xxxxx > 65535, subtract 30000
 if __name__ == "__main__":
-#    app.run(host="info3103.cs.unb.ca", port=xxxx, debug=True)
-	app.run(host=settings.APP_HOST, port=settings.APP_PORT, debug=settings.APP_DEBUG)
+	context = ('cert.pem', 'key.pem')
+	app.run(host=settings.APP_HOST, port=settings.APP_PORT, ssl_context=context, debug=settings.APP_DEBUG)
