@@ -1,4 +1,5 @@
 import { LeaguesPage } from './components/Leagues/LeaguesPage.js'
+import { RecentMatchesPage } from './components/RecentMatches/RecentMatchesPage.js'
 import { Login } from './components/Login/Login.js'
 import { MainScreenTemplate } from './templates/Login/MainScreenTemplate.js'
 
@@ -6,8 +7,8 @@ Vue.use(VueRouter)
 
 const router = new VueRouter({
   routes: [{
-    path: '/leagues',
-    component: LeaguesPage,
+    path: '/leagues/:id/matches',
+    component: RecentMatchesPage,
     name: 'Leagues Page',
   }]
 })
@@ -24,15 +25,12 @@ new Vue({
         let userId = localStorage.getItem('userId');
         if (userId) {
             this.isAuthenticated = true;
-            this.userId = userId;
             this.$router.push({ name: 'Leagues Page' })
         } 
     },
     methods: {
         setAuth() {
             this.isAuthenticated = true;
-            let userId = localStorage.getItem('userId');
-            this.userId = userId
             this.$router.push({ name: 'Leagues Page' })
         }
     },

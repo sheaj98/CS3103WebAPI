@@ -3,6 +3,7 @@ import { LeagueCardTemplate } from '../../templates/Leagues/LeagueCardTemplate.j
 const LeagueCard = {
     //------- props -------
     props: {
+        leagueId: String,
         leagueName: String, 
         leagueDescription: String,
     },
