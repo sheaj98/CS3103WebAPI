@@ -1,0 +1,12 @@
+.loginScreen {
+    display: flex;
+    flex-direction: column;
+}
+
+.loginSplash {
+    flex: 50%;
+}
+
+.loginForm {
+    flex: 50%;
+}
