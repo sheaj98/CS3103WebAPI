@@ -2,12 +2,15 @@ import { LeaguesPage } from './components/Leagues/LeaguesPage.js'
 import { Login } from './components/Login/Login.js'
 import { MainScreenTemplate } from './templates/Login/MainScreenTemplate.js'
 
-// Vue.use(VueRouter)
+Vue.use(VueRouter)
 
-// const router = new VueRouter({
-//   routes: [{
-//   }]
-// })
+const router = new VueRouter({
+  routes: [{
+    path: '/leagues',
+    component: LeaguesPage,
+    name: 'Leagues Page',
+  }]
+})
 
 new Vue({
     el: '#app',
@@ -22,6 +25,7 @@ new Vue({
         if (userId) {
             this.isAuthenticated = true;
             this.userId = userId;
+            this.$router.push({ name: 'Leagues Page' })
         } 
     },
     methods: {
@@ -29,12 +33,13 @@ new Vue({
             this.isAuthenticated = true;
             let userId = localStorage.getItem('userId');
             this.userId = userId
+            this.$router.push({ name: 'Leagues Page' })
         }
     },
     components: {
-        LeaguesPage,
         Login
     },
+    router,
     template: MainScreenTemplate
 })
 

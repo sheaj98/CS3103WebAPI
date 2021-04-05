@@ -4,7 +4,7 @@ const MainScreenTemplate = `
             <Login v-on:userAuth="setAuth" />
         </div>
         <div v-else>
-            <LeaguesPage v-bind:userId="userId" />
+            <router-view></router-view>
         </div>
     </div>
 `

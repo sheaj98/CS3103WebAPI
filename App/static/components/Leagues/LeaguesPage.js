@@ -10,10 +10,6 @@ const LeaguesPage = {
     components: {
         LeagueCard
     },
-
-    props: {
-        userId: String
-    },
     
     data: function() {
         return {
@@ -23,7 +19,8 @@ const LeaguesPage = {
                 leagueFormat: 1
             },
             leagues: [],
-            showingModal: false
+            showingModal: false,
+            userId: localStorage.getItem('userId')
         }
     },
 
@@ -63,7 +60,9 @@ const LeaguesPage = {
                     "leagueFormatId": this.input.leagueFormat
                 })
                 .then(response => {
+                    this.hideModal()
                     this.getLeaguesForUser()
+                    this.name = "";
                 })
                 .catch(e => {
                     alert("There was an issue adding the league.");
