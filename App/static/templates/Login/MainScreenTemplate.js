@@ -4,7 +4,7 @@ const MainScreenTemplate = `
             <Login v-on:userAuth="setAuth" />
         </div>
         <div v-else>
-            This is home screen
+            <LeaguesPage userId="1" />
         </div>
     </div>
 `
