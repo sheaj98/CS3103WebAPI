@@ -19,7 +19,7 @@ const Login = {
                     "password": this.input.password
                 })
                 .then(response => {
-                    localStorage.setItem('userId', response.data.userId);
+                    localStorage.setItem('userId', response.data.user.userId);
                     console.log(response)
                     this.$emit('userAuth');         
                 })

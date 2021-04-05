@@ -1,6 +1,9 @@
 import { LeaguesPageTemplate } from '../../templates/Leagues/LeaguesPageTemplate.js'
 import { LeagueCard } from '../../components/Leagues/LeagueCard.js'
 
+Vue.component("modal", {
+    template: "#modal-template"
+});
 
 const LeaguesPage = {
 
@@ -14,19 +17,13 @@ const LeaguesPage = {
     
     data: function() {
         return {
-            serviceURL: "https://cs3103.cs.unb.ca:52617/static",
+            serviceURL: "https://cs3103.cs.unb.ca:58651",
             input: {
-                leagueName: "",
-                leagueDescription: "",
-                leagueFormat: 0
+                name: "",
+                leagueFormat: 1
             },
-            leagues: [
-                {leagueName: "Test League", leagueDescription: "This is a cool league"},
-                {leagueName: "Hello World", leagueDescription: "this is another saucey league"},
-                {leagueName: "Hello World", leagueDescription: "this is another saucey league"},
-                {leagueName: "Hello World", leagueDescription: "this is another saucey league"},
-                {leagueName: "Hello World", leagueDescription: "this is another saucey league"}
-            ]
+            leagues: [],
+            showingModal: false
         }
     },
 
@@ -36,13 +33,19 @@ const LeaguesPage = {
     },
 
     methods: {
+        hideModal() {
+            this.showingModal = false
+        },
+        showModal() {
+            this.showingModal = true
+        },
         getLeaguesForUser() {
             if (this.userId != "") {
                 //Get all of the leagues
                 axios
                 .get(this.serviceURL+"/users/"+this.userId+"/leagues")
                 .then(response => {
-                    this.leagues = response.data 
+                    this.leagues = response.data.leagues
                 })
                 .catch(e => {
                     alert("There was an issue getting the leagues for the particular user.");
@@ -56,12 +59,10 @@ const LeaguesPage = {
             if (this.userId != "") {
                 axios
                 .post(this.serviceURL+"/users/"+this.userId+"/leagues", {
-                    "leagueName": this.input.username,
-                    "leagueDescription": this.input.password,
-                    "leagueFormat": this.input.leagueFormat
+                    "leagueName": this.input.name,
+                    "leagueFormatId": this.input.leagueFormat
                 })
                 .then(response => {
-                    //Update League List 
                     this.getLeaguesForUser()
                 })
                 .catch(e => {
