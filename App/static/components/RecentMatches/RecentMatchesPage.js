@@ -1,36 +1,38 @@
 import { RecentMatchesPageTemplate } from '../../templates/RecentMatches/RecentMatchesPageTemplate.js'
+import { RecentMatchesCell } from '../../components/RecentMatches/RecentMatchesCell.js'
 
 const RecentMatchesPage = {
     template: RecentMatchesPageTemplate,
 
-    //------- props -------
-    props: {
-        userId: String
+    components: {
+        RecentMatchesCell
     },
     
-    //------- data --------
-    data: {
-        serviceURL: "https://cs3103.cs.unb.ca:52617",
-        matches: [],
-        leagues: []
+    data: function() {
+        return {
+            userId: localStorage.getItem("userId"),
+            leagueId: this.$route.params.id,
+            serviceURL: "https://cs3103.cs.unb.ca:52617",
+            results: [],
+            showingModal: false
+        }
+    },
+
+    mounted: function() {
+        this.getRecentMatches();
     },
 
     methods: {
-        mounted() {
-            console.log(this.$el);
-        },
-
         getRecentMatches() {
-            if (this.userId != "") {
+            if (this.userId != "" && this.leagueId != "") {
                 //Get all of the leagues
                 axios
-                .get(this.serviceURL+"/users/"+userId+"/leagues")
+                .get(this.serviceURL+"/users/"+this.userId+"/leagues/"+this.leagueId+"/matches")
                 .then(response => {
-                    console.log(response)
-                    this.leagues = response.data 
+                    this.results = response.data.matches
                 })
                 .catch(e => {
-                    alert("There was an issue getting the leagues for the particular user.");
+                    alert("There was an issue getting the matches for the particular user.");
                     console.log(e);
                 });
 
@@ -38,25 +40,7 @@ const RecentMatchesPage = {
                 alert("Invalid user id.");
             }
         },
-
-
-        logout() {
-            alert("No magic on the server yet. You'll have to write the logout code there.");
-            axios
-            .delete(this.serviceURL+"/signin")
-            .then(response => {
-                location.reload();
-            })
-            .catch(e => {
-                console.log(e);
-            });
-        },
-
-        fetchSchools() {
-            alert("This feature not available until schoolsV2.")
-        }
     }
-    //------- END methods --------
 }
 
 export { RecentMatchesPage }

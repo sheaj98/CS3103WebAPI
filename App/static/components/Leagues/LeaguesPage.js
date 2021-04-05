@@ -13,7 +13,7 @@ const LeaguesPage = {
     
     data: function() {
         return {
-            serviceURL: "https://cs3103.cs.unb.ca:58651",
+            serviceURL: "https://cs3103.cs.unb.ca:52617",
             input: {
                 name: "",
                 leagueFormat: 1
