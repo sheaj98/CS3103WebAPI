@@ -434,6 +434,24 @@ class LeaguesForUser(Resource):
 			cursor.close()
 			dbConnection.close()
 
+class MatchesForUser(Resource):
+	@user_decorator()
+	def get(self, userId):
+		# Curl Example: curl -c cookie-jar http://cs3103.cs.unb.ca:58651/users/1/matches
+		try:
+			dbConnection = getDBConnection()
+			sql = 'getLeaguesForUser'
+			cursor = dbConnection.cursor()
+			sqlArgs = (userId,)
+			cursor.callproc(sql,sqlArgs) # stored procedure, no arguments
+			rows = cursor.fetchall() # get the single result
+		except:
+			abort(500) # Nondescript server error
+		finally:
+			cursor.close()
+			dbConnection.close()
+		return make_response(jsonify({"leagues": rows}), 200) # successful
+
 class LeagueMemberById(Resource):
 	@member_decorator()
 	def get(self, userId, leagueId, memberId):

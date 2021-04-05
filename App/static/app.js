@@ -1,4 +1,4 @@
-import { Login } from './components/Login/Login.js'
+import { LeaguesPage } from './components/Leagues/LeaguesPage.js'
 import {MainScreenTemplate} from './templates/Login/MainScreenTemplate.js'
 
 // Vue.use(VueRouter)
@@ -11,7 +11,7 @@ import {MainScreenTemplate} from './templates/Login/MainScreenTemplate.js'
 new Vue({
     el: '#app',
     components: {
-        Login
+        LeaguesPage
     },
     template: MainScreenTemplate
 })

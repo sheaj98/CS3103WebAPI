@@ -1,6 +1,6 @@
 const MainScreenTemplate = `
     <div>
-        <Login />
+        <LeaguesPage userId="1" />
     </div>
 `
 export {MainScreenTemplate}
