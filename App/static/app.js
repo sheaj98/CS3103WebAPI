@@ -10,6 +10,22 @@ import {MainScreenTemplate} from './templates/Login/MainScreenTemplate.js'
 
 new Vue({
     el: '#app',
+    data: function() {
+        return {
+            isAuthenticated: false
+        }
+    },
+    mounted() {
+        let userId = localStorage.getItem('userId');
+        if (userId) {
+            this.isAuthenticated = true;
+        } 
+    },
+    methods: {
+        setAuth() {
+            this.isAuthenticated = true;
+        }
+    },
     components: {
         LeaguesPage
     },
