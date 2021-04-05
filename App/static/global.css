@@ -1,12 +1,11 @@
 .loginScreen {
-    display: flex;
-    flex-direction: column;
+    height: 100vh;
 }
 
-.loginSplash {
-    flex: 50%;
-}
-
-.loginForm {
-    flex: 50%;
-}
+html {
+    height: 100%;
+ }
+ 
+ body {
+    min-height: 100%;
+ }
