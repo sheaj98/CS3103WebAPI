@@ -37,7 +37,7 @@ const LeaguesPageTemplate = `
                             </div>
                             <div class="form-group">
                                 <label for="leagueDescription">Description</label>
-                                <input type="text" class="form-control" id="leagueDescription" v-model="input.leagueDescription" placeholder="Enter league description">
+                                <input type="text" class="form-control" id="leagueDescription" v-model="input.description" placeholder="Enter league description">
                             </div>
                             <div class="input-group mb-3">
                                 <div class="input-group-prepend">

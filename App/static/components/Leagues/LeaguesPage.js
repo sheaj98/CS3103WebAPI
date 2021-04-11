@@ -16,7 +16,8 @@ const LeaguesPage = {
             serviceURL: "https://cs3103.cs.unb.ca:8005",
             input: {
                 name: "",
-                leagueFormat: 1
+                leagueFormat: 1,
+                description: "",
             },
             leagues: [],
             showingModal: false,
@@ -42,6 +43,7 @@ const LeaguesPage = {
                 axios
                 .get(this.serviceURL+"/users/"+this.userId+"/leagues")
                 .then(response => {
+                    console.log(response)
                     this.leagues = response.data.leagues
                 })
                 .catch(e => {
@@ -57,7 +59,8 @@ const LeaguesPage = {
                 axios
                 .post(this.serviceURL+"/users/"+this.userId+"/leagues", {
                     "leagueName": this.input.name,
-                    "leagueFormatId": this.input.leagueFormat
+                    "leagueFormatId": this.input.leagueFormat,
+                    "leagueDescription": this.input.description
                 })
                 .then(response => {
                     this.hideModal()

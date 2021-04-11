@@ -401,21 +401,22 @@ class LeaguesForUser(Resource):
 
 	@user_decorator()
 	def post(self, userId):
-		# Curl Example:  curl -i -k -X POST -H "Content-Type: application/json" -b cookie-jar -d '{"leagueName": "Test League", "leagueFormatId": 2}' https://cs3103.cs.unb.ca:8005/users/<Insert Your Id>/leagues
+		# Curl Example:  curl -i -k -X POST -H "Content-Type: application/json" -b cookie-jar -d '{"leagueName": "Test League", "leagueDescription": "Test League","leagueFormatId": 2}' https://cs3103.cs.unb.ca:8005/users/<Insert Your Id>/leagues
 		if not request.json:
 			return bad_request(None) # bad request
-		if not 'leagueName' in request.json or not 'leagueFormatId' in request.json:
+		if not 'leagueName' in request.json or not 'leagueDescription' in request.json or not 'leagueFormatId' in request.json:
 			return bad_request(None) # bad request
 
 			# The request object holds the ... wait for it ... client request!
 		# Pull the results out of the json request
 		leagueName = request.json['leagueName']
+		leagueDescription = request.json['leagueDescription']
 		leagueFormatId = request.json['leagueFormatId']
 
 		try:
 			dbConnection = getDBConnection()
 			cursor = dbConnection.cursor()
-			sqlArgs = (leagueName, leagueFormatId)
+			sqlArgs = (leagueName, leagueDescription, leagueFormatId)
 			try:
 				cursor.callproc('createLeague',sqlArgs) 
 				row = cursor.fetchone()
