@@ -353,27 +353,36 @@ class LeagueMembers(Resource):
 
 	@owner_decorator()
 	def post(self, userId, leagueId):
-		# Curl Example:  curl -i -X POST -H "Content-Type: application/json" -d '{"userId": 6, "role": "Participant"}' http://cs3103.cs.unb.ca:52617/users/2/leagues/3/members
+		# Curl Example:  curl -i -X POST -H "Content-Type: application/json" -d '{"firstName": "Ethan", "lastName": "Eddy", "email": "eeddy@unb.ca"}' http://cs3103.cs.unb.ca:52617/users/2/leagues/3/members
 		if not request.json:
 			return bad_request(None) # bad request
-		if not 'userId' in request.json or not 'role' in request.json:
+		if not 'firstName' in request.json or not 'lastName' in request.json or not 'email' in request.json:
 			return bad_request(None) # bad request
 
-			# The request object holds the ... wait for it ... client request!
-		# Pull the results out of the json request
-		userIdIn = request.json['userId']
-		role = request.json['role']
+		firstName = request.json['firstName']
+		lastName = request.json['lastName']
+		email = request.json['email']
 
 		try:
 			dbConnection = getDBConnection()
 			cursor = dbConnection.cursor()
-			sqlArgs = (userIdIn, leagueId, role)
+			sqlArgs = (email,)
 			try:
-				cursor.callproc('createLeagueMember',sqlArgs) 
+				cursor.callproc('getUser',sqlArgs) 
 				row = cursor.fetchone()
-				dbConnection.commit() # database was modified, commit the changes
+				if row is None:
+					sqlArgs2 = (email, firstName, lastName)
+					cursor.callproc('createUser', sqlArgs2)
+					dbConnection.commit()
+					cursor.callproc('getUser',sqlArgs) 
+					row = cursor.fetchone()
+				uId = row["userId"]
+				sqlArgs3 = (uId, leagueId, "member")
+				cursor.callproc('createLeagueMember', sqlArgs3)
+				dbConnection.commit()
 				return make_response(jsonify({}), 201)
-			except:
+			except Exception as e:
+				print(e)
 				return bad_request(None)
 		except:
 			abort(500) # Nondescript server error

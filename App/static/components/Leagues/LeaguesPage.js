@@ -26,7 +26,6 @@ const LeaguesPage = {
     },
 
     mounted: function() {
-        console.log("Getting leagues for user")
         this.getLeaguesForUser();
     },
 
@@ -76,7 +75,8 @@ const LeaguesPage = {
             }
         },
         goToLeague(leagueId) {
-            this.$router.push({ path: `/leagues/`+leagueId+`/matches` })
+            this.$router.push({ path: `/leagues/`+leagueId+`/members` })
+            // this.$router.push({ path: `/leagues/`+leagueId+`/matches` })
         }
     },
 
