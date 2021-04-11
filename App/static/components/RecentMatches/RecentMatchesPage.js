@@ -12,8 +12,8 @@ const RecentMatchesPage = {
         return {
             userId: localStorage.getItem("userId"),
             leagueId: this.$route.params.id,
-            serviceURL: "https://cs3103.cs.unb.ca:58651",
-            results: [],
+            serviceURL: "https://cs3103.cs.unb.ca:8005",
+            matches: [],
             showingModal: false
         }
     },
@@ -29,15 +29,15 @@ const RecentMatchesPage = {
                 axios
                 .get(this.serviceURL+"/users/"+this.userId+"/leagues/"+this.leagueId+"/matches")
                 .then(response => {
-                    this.results = response.data.matches
+                    console.log(response)
+                    this.matches = response.data.matches
                 })
                 .catch(e => {
-                    alert("There was an issue getting the matches for the particular user.");
+                    alert("There was an issue getting the matches for the particular league.");
                     console.log(e);
                 });
-
             } else {
-                alert("Invalid user id.");
+                alert("Invalid user id or league id.");
             }
         },
     }

@@ -193,7 +193,7 @@ def auth_decorator():
 
 
 class Login(Resource):
-	# curl -i -X POST -H "Content-Type: application/json" -c cookie-jar -k -d '{"username": "<UNB FCS Username>", "password": "<UNB FCS Password>"}' https://cs3103.cs.unb.ca:58651/login
+	# curl -i -X POST -H "Content-Type: application/json" -c cookie-jar -k -d '{"username": "<UNB FCS Username>", "password": "<UNB FCS Password>"}' https://cs3103.cs.unb.ca:8005/login
 	def post(self):
 		if not request.json:
 			return bad_request(None) # bad request
@@ -249,7 +249,7 @@ class Login(Resource):
 
 class Users(Resource):
 	def post(self):
-		# Curl Example:  curl -i -X POST -H "Content-Type: application/json" -k -d '{"email": "<Insert Email>", "firstName": "<Insert First Name>", "lastName": "<Insert Last Name>", "isActive": true}' https://cs3103.cs.unb.ca:58651/users
+		# Curl Example:  curl -i -X POST -H "Content-Type: application/json" -k -d '{"email": "<Insert Email>", "firstName": "<Insert First Name>", "lastName": "<Insert Last Name>", "isActive": true}' https://cs3103.cs.unb.ca:8005/users
 		if not request.json:
 			return bad_request(None) # bad request
 		if not 'email' in request.json or not 'firstName' in request.json or not 'lastName' in request.json or not 'isActive' in request.json:
@@ -384,7 +384,7 @@ class LeagueMembers(Resource):
 class LeaguesForUser(Resource):
 	@user_decorator()
 	def get(self, userId):
-		# Curl Example: curl -c cookie-jar http://cs3103.cs.unb.ca:58651/users/1/leagues
+		# Curl Example: curl -c cookie-jar http://cs3103.cs.unb.ca:8005/users/1/leagues
 		try:
 			dbConnection = getDBConnection()
 			sql = 'getLeaguesForUser'
@@ -401,7 +401,7 @@ class LeaguesForUser(Resource):
 
 	@user_decorator()
 	def post(self, userId):
-		# Curl Example:  curl -i -k -X POST -H "Content-Type: application/json" -b cookie-jar -d '{"leagueName": "Test League", "leagueFormatId": 2}' https://cs3103.cs.unb.ca:58651/users/<Insert Your Id>/leagues
+		# Curl Example:  curl -i -k -X POST -H "Content-Type: application/json" -b cookie-jar -d '{"leagueName": "Test League", "leagueFormatId": 2}' https://cs3103.cs.unb.ca:8005/users/<Insert Your Id>/leagues
 		if not request.json:
 			return bad_request(None) # bad request
 		if not 'leagueName' in request.json or not 'leagueFormatId' in request.json:
@@ -437,7 +437,7 @@ class LeaguesForUser(Resource):
 class MatchesForUser(Resource):
 	@user_decorator()
 	def get(self, userId):
-		# Curl Example: curl -c cookie-jar http://cs3103.cs.unb.ca:58651/users/1/matches
+		# Curl Example: curl -c cookie-jar http://cs3103.cs.unb.ca:8005/users/1/matches
 		try:
 			dbConnection = getDBConnection()
 			sql = 'getLeaguesForUser'
@@ -563,7 +563,7 @@ class Leagues(Resource):
 class Matches(Resource):
 	@member_decorator() 
 	def post(self, userId, leagueId):
-		# Curl Example:  curl -i -X POST -b cookie-jar http://cs3103.cs.unb.ca:58651/users/16/leagues/11/matches
+		# Curl Example:  curl -i -X POST -b cookie-jar http://cs3103.cs.unb.ca:8005/users/16/leagues/11/matches
 		try:
 			dbConnection = getDBConnection()
 			cursor = dbConnection.cursor()
@@ -654,7 +654,7 @@ class Match(Resource):
 class Results(Resource):
 	@member_decorator()
 	def post(self, userId, leagueId, matchId):
-		# Curl Example:  curl -i -X POST -H "Content-Type: application/json" -b cookie-jar -d '{"points": 100, "userId": 1}' http://cs3103.cs.unb.ca:58651/users/16/leagues/11/matches/13/results
+		# Curl Example:  curl -i -X POST -H "Content-Type: application/json" -b cookie-jar -d '{"points": 100, "userId": 1}' http://cs3103.cs.unb.ca:8005/users/16/leagues/11/matches/13/results
 		if not request.json:
 			return bad_request(None) # bad request
 		if not 'points' in request.json or not 'userId' in request.json:
