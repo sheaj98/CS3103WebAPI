@@ -26,7 +26,6 @@ const LeaguesPage = {
     },
 
     mounted: function() {
-        console.log("Getting leagues for user")
         this.getLeaguesForUser();
     },
 
