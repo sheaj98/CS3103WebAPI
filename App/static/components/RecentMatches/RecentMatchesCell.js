@@ -14,7 +14,7 @@ const RecentMatchesCell = {
 
     data: function() {
         return {
-            serviceURL: "https://cs3103.cs.unb.ca:8005",
+            serviceURL: "https://cs3103.cs.unb.ca:58651",
             user1: {
                 firstName: "",
                 lastName: "",

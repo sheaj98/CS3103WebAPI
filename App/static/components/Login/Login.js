@@ -3,7 +3,7 @@ import { LoginTemplate } from '../../templates/Login/LoginTemplate.js'
 const Login = {
     data: function () {
         return {
-            serviceURL: "https://cs3103.cs.unb.ca:8005",
+            serviceURL: "https://cs3103.cs.unb.ca:58651",
             loginInput: {
                 username: "",
                 password: ""
