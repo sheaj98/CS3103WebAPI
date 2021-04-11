@@ -5,7 +5,7 @@ const LeaguesPageTemplate = `
             <div class="row">
                 <div v-for="league in leagues">
                     <div class="col">
-                        <LeagueCard v-bind:leagueName="league.name" v-bind:leagueDescription="league.description" />
+                        <LeagueCard v-bind:leagueName="league.name" v-bind:leagueDescription="league.description" v-on:click.native="goToLeague()"/>
                     </div>
                 </div>
             </div>

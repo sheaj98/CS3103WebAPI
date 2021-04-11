@@ -13,7 +13,7 @@ const LeaguesPage = {
     
     data: function() {
         return {
-            serviceURL: "https://cs3103.cs.unb.ca:52617",
+            serviceURL: "https://cs3103.cs.unb.ca:58651",
             input: {
                 name: "",
                 leagueFormat: 1
@@ -71,6 +71,9 @@ const LeaguesPage = {
             } else {
                 alert("Invalid user id.");
             }
+        },
+        goToLeague() {
+            this.$router.push({ path: `/leagues/5/matches` })
         }
     },
 

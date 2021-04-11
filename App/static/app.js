@@ -7,10 +7,16 @@ Vue.use(VueRouter)
 
 const router = new VueRouter({
   routes: [{
-    path: '/leagues/:id/matches',
-    component: RecentMatchesPage,
+    path: '/leagues',
+    component: LeaguesPage,
     name: 'Leagues Page',
-  }]
+  },
+  {
+      path: '/leagues/:id/matches',
+      component: RecentMatchesPage,
+      name: 'Recent Matches'
+  }
+]
 })
 
 new Vue({
