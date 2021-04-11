@@ -10,7 +10,7 @@ const LeagueCard = {
     
     //------- data --------
     data: {
-        serviceURL: "https://cs3103.cs.unb.ca:8005",
+        serviceURL: "https://cs3103.cs.unb.ca:58651",
     },
 
     template: LeagueCardTemplate,

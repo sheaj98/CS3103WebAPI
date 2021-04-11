@@ -1,4 +1,5 @@
 import { LeaguesPage } from './components/Leagues/LeaguesPage.js'
+import { LeagueDetailPage } from './components/Leagues/LeagueDetailPage.js'
 import { RecentMatchesPage } from './components/RecentMatches/RecentMatchesPage.js'
 import { ParticipantPage } from './components/Participants/ParticipantPage.js'
 import { Login } from './components/Login/Login.js'
@@ -18,9 +19,15 @@ const router = new VueRouter({
 //       name: 'Recent Matches'
 //   },
   {
-    path: '/leagues/:id/members',
-    component: ParticipantPage,
-    name: 'Recent Matches'
+      path: '/leagues/:id',
+      component: LeagueDetailPage,
+      name: 'League Details',
+      children: [
+          {
+              path: 'matches',
+              component: RecentMatchesPage
+          }
+      ]
   }
 ]
 })
