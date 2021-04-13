@@ -3,7 +3,7 @@ import { LeagueDetailPageTemplate } from '../../templates/Leagues/LeagueDetailPa
 const LeagueDetailPage = {
     data: function() {
         return {
-            serviceURL: "https://cs3103.cs.unb.ca:58651",
+            serviceURL: "https://cs3103.cs.unb.ca:8005",
             userId: localStorage.getItem('userId'),
             leagueId: this.$route.params.id,
             league: {

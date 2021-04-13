@@ -4,6 +4,7 @@ import { RecentMatchesPage } from './components/RecentMatches/RecentMatchesPage.
 import { ParticipantPage } from './components/Participants/ParticipantPage.js'
 import { Login } from './components/Login/Login.js'
 import { MainScreenTemplate } from './templates/Login/MainScreenTemplate.js'
+import { LeaderboardPage } from './components/Leaderboard/LeaderboardPage.js'
 
 Vue.use(VueRouter)
 
@@ -30,6 +31,10 @@ const router = new VueRouter({
           {
               path: 'members',
               component: ParticipantPage
+          },
+          {
+            path: 'leaderboard',
+            component: LeaderboardPage
           }
       ]
   }

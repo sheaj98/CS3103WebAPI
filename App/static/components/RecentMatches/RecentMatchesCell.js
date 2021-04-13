@@ -14,7 +14,7 @@ const RecentMatchesCell = {
 
     data: function() {
         return {
-            serviceURL: "https://cs3103.cs.unb.ca:58651",
+            serviceURL: "https://cs3103.cs.unb.ca:8005",
             user1: {
                 firstName: "",
                 lastName: "",
@@ -25,6 +25,7 @@ const RecentMatchesCell = {
                 lastName: "",
                 points: 0
             },
+            date: "",
         }
     },
 
@@ -33,6 +34,7 @@ const RecentMatchesCell = {
         this.user1.points = this.result_1.points
         this.getUser2(this.result_2.User_userId)
         this.user2.points = this.result_2.points
+        this.date = this.result_1.lastModified
     },
 
     methods: {

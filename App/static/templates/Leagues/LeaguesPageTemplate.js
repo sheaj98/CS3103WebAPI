@@ -39,17 +39,6 @@ const LeaguesPageTemplate = `
                                 <label for="leagueDescription">Description</label>
                                 <input type="text" class="form-control" id="leagueDescription" v-model="input.description" placeholder="Enter league description">
                             </div>
-                            <div class="input-group mb-3">
-                                <div class="input-group-prepend">
-                                    <label class="input-group-text" for="inputGroupSelect01">Options</label>
-                                </div>
-                                <select class="custom-select" id="inputGroupSelect01">
-                                    <option selected>Choose...</option>
-                                    <option value="1">Option 1</option>
-                                    <option value="2">Option 2</option>
-                                    <option value="3">Option 3</option>
-                                </select>
-                            </div>
                         </form>
                     </div>
                     <div class="modal-footer">
