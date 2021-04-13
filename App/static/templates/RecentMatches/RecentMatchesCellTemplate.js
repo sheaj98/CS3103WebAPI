@@ -13,7 +13,7 @@ const RecentMatchesCellTemplate = `
                 </div>
             </div>
             <div class="row justify-content-center text-center">
-                <p> March 1st, 2021 </p>
+                <p> {{date}} </p>
             </div>
         </div>
     </div>

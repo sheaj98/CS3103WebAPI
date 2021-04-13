@@ -12,7 +12,7 @@ const RecentMatchesPage = {
         return {
             userId: localStorage.getItem("userId"),
             leagueId: this.$route.params.id,
-            serviceURL: "https://cs3103.cs.unb.ca:58651",
+            serviceURL: "https://cs3103.cs.unb.ca:8005",
             matches: [],
             showingModal: false
         }
