@@ -70,3 +70,8 @@ html {
     margin-left: -15rem;
   }
 }
+
+.router-link-active {
+    border-left-color: #007bff;
+    border-left: 5px solid;
+}

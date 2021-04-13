@@ -26,6 +26,10 @@ const router = new VueRouter({
           {
               path: 'matches',
               component: RecentMatchesPage
+          },
+          {
+              path: 'members',
+              component: ParticipantPage
           }
       ]
   }

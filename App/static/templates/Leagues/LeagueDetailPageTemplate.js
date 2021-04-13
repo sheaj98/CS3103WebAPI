@@ -5,9 +5,9 @@ const LeagueDetailPageTemplate = `
     <div class="bg-light border-right" id="sidebar-wrapper">
     <div class="sidebar-heading">{{league.name}}</div>
     <div class="list-group list-group-flush">
-        <router-link :to="{ path: 'matches'}" append class="list-group-item list-group-item-action bg-light">Recent Matches</router-link>
+        <router-link :to="{ path: '/leagues/' + this.leagueId +'/matches'}" exact class="list-group-item list-group-item-action bg-light">Recent Matches</router-link>
         <a href="#" class="list-group-item list-group-item-action bg-light">Leaderboard</a>
-        <a href="#" class="list-group-item list-group-item-action bg-light">Participants</a>
+        <router-link :to="{ path: '/leagues/' + this.leagueId +'/members'}" exact class="list-group-item list-group-item-action bg-light">Participants</router-link>
         <a href="#" class="list-group-item list-group-item-action bg-light">League Details</a>
     </div>
     </div>
