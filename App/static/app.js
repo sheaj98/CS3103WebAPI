@@ -5,6 +5,7 @@ import { ParticipantPage } from './components/Participants/ParticipantPage.js'
 import { Login } from './components/Login/Login.js'
 import { MainScreenTemplate } from './templates/Login/MainScreenTemplate.js'
 import { LeaderboardPage } from './components/Leaderboard/LeaderboardPage.js'
+import { LeagueDetailsPage } from './components/LeagueDetails/LeagueDetailsPage.js'
 
 Vue.use(VueRouter)
 
@@ -14,11 +15,6 @@ const router = new VueRouter({
     component: LeaguesPage,
     name: 'Leagues Page',
   },
-//   {
-//       path: '/leagues/:id/matches',
-//       component: RecentMatchesPage,
-//       name: 'Recent Matches'
-//   },
   {
       path: '/leagues/:id',
       component: LeagueDetailPage,
@@ -35,6 +31,10 @@ const router = new VueRouter({
           {
             path: 'leaderboard',
             component: LeaderboardPage
+          },
+          {
+            path: 'details',
+            component: LeagueDetailsPage
           }
       ]
   }

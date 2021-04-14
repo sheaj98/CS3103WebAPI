@@ -12,7 +12,8 @@ const ParticipantPage = {
                 firstName: "",
                 lastName: "", 
                 email: ""
-            }
+            },
+            isOwner: false
         }
     },
 
@@ -33,6 +34,7 @@ const ParticipantPage = {
             .then(response => {
                 console.log(response)
                 this.users = response.data.members
+                this.updateIsOwner()
             })
             .catch(e => {
                 alert("There was an issue getting the user.");
@@ -65,6 +67,17 @@ const ParticipantPage = {
                 alert("There was an issue adding the participant.");
                 console.log(e);
             });
+        },
+        updateIsOwner() {
+            var y
+            for (y=0; y < this.users.length; y++) {
+                var user = this.users[y]
+                if (user.role == "owner") {
+                    if (user.userId == this.userId) {
+                        this.isOwner = true
+                    }
+                }
+            }
         }
     },
 

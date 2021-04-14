@@ -8,7 +8,7 @@ const LeagueDetailPageTemplate = `
         <router-link :to="{ path: '/leagues/' + this.leagueId +'/matches'}" exact class="list-group-item list-group-item-action bg-light">Recent Matches</router-link>
         <router-link :to="{ path: '/leagues/' + this.leagueId +'/leaderboard'}" exact class="list-group-item list-group-item-action bg-light">Leaderboard</router-link>
         <router-link :to="{ path: '/leagues/' + this.leagueId +'/members'}" exact class="list-group-item list-group-item-action bg-light">Participants</router-link>
-        <a href="#" class="list-group-item list-group-item-action bg-light">League Details</a>
+        <router-link :to="{ path: '/leagues/' + this.leagueId +'/details'}" exact class="list-group-item list-group-item-action bg-light">Details</router-link>
     </div>
     </div>
     <!-- /#sidebar-wrapper -->
