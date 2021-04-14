@@ -546,20 +546,20 @@ class Leagues(Resource):
 
 	@owner_decorator()
 	def put(self, userId, leagueId):
-		# Curl Example: curl -i -X PUT -H "Content-Type: application/json" -d '{"leagueName": "Test League New Name", "leagueFormatId": 1}' http://cs3103.cs.unb.ca:52617/users/4/leagues/5
+		# Curl Example: curl -i -X PUT -H "Content-Type: application/json" -d '{"leagueName": "Test League New Name", "leagueDescription": "Test"}' http://cs3103.cs.unb.ca:52617/users/4/leagues/5
 		if not request.json:
 			return bad_request(None) # bad request
-		if not 'leagueName' in request.json or not 'leagueFormatId' in request.json:
+		if not 'leagueName' in request.json or not 'leagueDescription' in request.json:
 			return bad_request(None) # bad request
 
 		name = request.json['leagueName']
-		leagueFormatId = request.json['leagueFormatId']
+		description = request.json['leagueDescription']
 
 		try:
 			dbConnection = getDBConnection()
 			sql = 'updateLeague'
 			cursor = dbConnection.cursor()
-			sqlArgs = (leagueId, name, leagueFormatId)
+			sqlArgs = (leagueId, name, description)
 			cursor.callproc(sql,sqlArgs)
 			row = cursor.fetchone()
 			dbConnection.commit() # database was modified, commit the changes

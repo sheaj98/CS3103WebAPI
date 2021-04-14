@@ -44,7 +44,7 @@ DROP PROCEDURE IF EXISTS getMatchesForLeague //
 CREATE PROCEDURE getMatchesForLeague(IN leagueId INT)
 BEGIN
 SELECT * FROM `Match` 
-    WHERE League_leagueId = leagueId;
+    WHERE League_leagueId = leagueId ORDER BY lastModified DESC;
 END//
 DELIMITER ;
 

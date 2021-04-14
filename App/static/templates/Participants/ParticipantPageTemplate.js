@@ -17,12 +17,12 @@ const ParticipantPageTemplate = `
                         <td>{{user.lastName}}</td>
                         <td>{{user.role}}</td>
                         <td> 
-                            <button v-if="user.role != 'owner'" v-on:click="deleteUser(user.userId)" type="button" class="btn btn-danger">Delete</button>
+                            <button v-if="user.role != 'owner' && isOwner" v-on:click="deleteUser(user.userId)" type="button" class="btn btn-danger">Delete</button>
                         </td>
                     </tr>
                 </tbody>
             </table>
-            <button type="button" class="btn btn-primary" v-on:click="showModal()">Add Participant</button>
+            <button v-if="isOwner" type="button" class="btn btn-primary" v-on:click="showModal()">Add Participant</button>
         </div>
 
         <!-- Modal -->
