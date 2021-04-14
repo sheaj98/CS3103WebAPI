@@ -66,6 +66,7 @@ const LeagueDetailsPage = {
             axios
             .delete(this.serviceURL+"/users/"+this.userId+"/leagues/"+this.leagueId)
             .then(response => {
+                this.$router.push({ path: `/leagues` }) 
             })
             .catch(e => {
                 alert("There was an issue deleting the league.");

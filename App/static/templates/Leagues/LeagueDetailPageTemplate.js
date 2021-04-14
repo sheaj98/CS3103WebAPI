@@ -1,19 +1,15 @@
 const LeagueDetailPageTemplate = `
     <div class="d-flex" id="wrapper">
 
-    <!-- Sidebar -->
     <div class="bg-light border-right" id="sidebar-wrapper">
     <div class="sidebar-heading">{{league.name}}</div>
     <div class="list-group list-group-flush">
-        <router-link :to="{ path: '/leagues/' + this.leagueId +'/matches'}" exact class="list-group-item list-group-item-action bg-light">Recent Matches</router-link>
-        <router-link :to="{ path: '/leagues/' + this.leagueId +'/leaderboard'}" exact class="list-group-item list-group-item-action bg-light">Leaderboard</router-link>
-        <router-link :to="{ path: '/leagues/' + this.leagueId +'/members'}" exact class="list-group-item list-group-item-action bg-light">Participants</router-link>
-        <router-link :to="{ path: '/leagues/' + this.leagueId +'/details'}" exact class="list-group-item list-group-item-action bg-light">Details</router-link>
+        <router-link :to="{ path: '/leagues/' + this.leagueId +'/matches'}" class="list-group-item list-group-item-action bg-light">Recent Matches</router-link>
+        <router-link :to="{ path: '/leagues/' + this.leagueId +'/leaderboard'}" class="list-group-item list-group-item-action bg-light">Leaderboard</router-link>
+        <router-link :to="{ path: '/leagues/' + this.leagueId +'/members'}" class="list-group-item list-group-item-action bg-light">Participants</router-link>
+        <router-link :to="{ path: '/leagues/' + this.leagueId +'/details'}" class="list-group-item list-group-item-action bg-light">Details</router-link>
     </div>
     </div>
-    <!-- /#sidebar-wrapper -->
-
-    <!-- Page Content -->
     <div id="page-content-wrapper">
 
     <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
@@ -30,8 +26,6 @@ const LeagueDetailPageTemplate = `
         <router-view></router-view>
     </div>
     </div>
-    <!-- /#page-content-wrapper -->
-
     </div>
 `
 export { LeagueDetailPageTemplate }

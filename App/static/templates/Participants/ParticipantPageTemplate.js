@@ -16,9 +16,6 @@ const ParticipantPageTemplate = `
                         <td>{{user.firstName}}</td>
                         <td>{{user.lastName}}</td>
                         <td>{{user.role}}</td>
-                        <td> 
-                            <button v-if="user.role != 'owner' && isOwner" v-on:click="deleteUser(user.userId)" type="button" class="btn btn-danger">Delete</button>
-                        </td>
                     </tr>
                 </tbody>
             </table>

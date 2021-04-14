@@ -2,7 +2,7 @@ const LoginTemplate = `
     <div class='loginScreen container-fluid'>
         <div class="h-100 row align-items-center">
             <div class="col">
-                <img src="images/loginSplash.svg" alt="Splash Screen" />
+                <img class="loginSplash" src="images/loginSplash.svg" alt="Splash Screen" />
             </div>
             <div v-if="loggingIn" class="col">
                 <div class="form-group text-center">
