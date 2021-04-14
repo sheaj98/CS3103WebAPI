@@ -53,20 +53,24 @@ const ParticipantPage = {
             });
         },
         addParticipant() {
-            axios
-            .post(this.serviceURL+"/users/"+this.userId+"/leagues/"+this.leagueId+"/members", {
-                "firstName": this.input.firstName,
-                "lastName": this.input.lastName,
-                "email": this.input.email
-            })
-            .then(response => {
-                this.hideModal()
-                this.getParticipants()
-            })
-            .catch(e => {
-                alert("There was an issue adding the participant.");
-                console.log(e);
-            });
+            if(this.input.firstName === "" || this.input.lastName === "" || this.input.email === "" ){
+                alert("Form not correctly filled out - at least one value is missing.");
+            } else {
+                axios
+                .post(this.serviceURL+"/users/"+this.userId+"/leagues/"+this.leagueId+"/members", {
+                    "firstName": this.input.firstName,
+                    "lastName": this.input.lastName,
+                    "email": this.input.email
+                })
+                .then(response => {
+                    this.hideModal()
+                    this.getParticipants()
+                })
+                .catch(e => {
+                    alert("There was an issue adding the participant.");
+                    console.log(e);
+                });
+            }
         },
         updateIsOwner() {
             var y

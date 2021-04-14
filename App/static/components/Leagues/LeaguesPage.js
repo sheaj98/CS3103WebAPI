@@ -54,7 +54,9 @@ const LeaguesPage = {
             }
         },
         addLeague() {
-            if (this.userId != "") {
+            if (this.input.name === "" || this.input.leagueFormat === "" || this.input.description === "") {
+                alert("Form not correctly filled out - at least one value is missing.");
+            } else {
                 axios
                 .post(this.serviceURL+"/users/"+this.userId+"/leagues", {
                     "leagueName": this.input.name,
@@ -70,8 +72,6 @@ const LeaguesPage = {
                     alert("There was an issue adding the league.");
                     console.log(e);
                 });
-            } else {
-                alert("Invalid user id.");
             }
         },
         goToLeague(leagueId) {
